@@ -31,10 +31,13 @@ export const deleteDocuments = (policyName) => {
   }
 };
 
-export const retrieveRelevantChunks = (queryEmbedding, topK = 5) => {
+export const retrieveRelevantChunks = (queryEmbedding, topK = 5, filterPolicyName = null) => {
   const results = [];
 
   for (const item of store) {
+    if (filterPolicyName && item.policyName !== filterPolicyName) {
+      continue;
+    }
     const similarityScore = cosineSimilarity(queryEmbedding, item.embedding);
     results.push({
       chunkText: item.chunkText,
