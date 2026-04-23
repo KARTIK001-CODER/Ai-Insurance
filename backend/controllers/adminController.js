@@ -1,4 +1,6 @@
 import { parseDocument } from '../utils/parser.js';
+import { chunkText } from '../services/rag/chunker.js';
+import { generateEmbedding } from '../services/rag/embedder.js';
 import fs from 'fs/promises';
 
 export const uploadPolicy = async (req, res) => {
@@ -23,21 +25,40 @@ export const uploadPolicy = async (req, res) => {
     const { path: filePath, mimetype: mimeType } = req.file;
 
     const extractedText = await parseDocument(filePath, mimeType);
-    const previewText = extractedText.substring(0, 500);
+    
+    const chunks = chunkText(extractedText);
+    const processedChunks = [];
+
+    await Promise.all(
+      chunks.map(async (chunk) => {
+        try {
+          const embedding = await generateEmbedding(chunk);
+          processedChunks.push({
+            chunkText: chunk,
+            embedding,
+            policyName,
+            insurer
+          });
+        } catch (embedError) {
+          console.error('Embedding failed for a chunk', embedError);
+        }
+      })
+    );
 
     return res.status(200).json({
       success: true,
       policyName,
       insurer,
       fileType: mimeType,
-      extractedText: previewText
+      processedChunksCount: processedChunks.length,
+      sampleChunk: processedChunks[0] || null
     });
 
   } catch (error) {
     if (req.file) await fs.unlink(req.file.path).catch(() => {});
     return res.status(500).json({
       success: false,
-      message: 'Failed to parse the document or process the request.'
+      message: 'Failed to process the document.'
     });
   }
 };
