@@ -1,4 +1,6 @@
-export const createRecommendation = (req, res) => {
+import { generateRecommendation } from '../services/ai/agent.js';
+
+export const createRecommendation = async (req, res) => {
   try {
     const { fullName, age, lifestyle, preExistingConditions, incomeBand, cityTier } = req.body;
 
@@ -54,12 +56,15 @@ export const createRecommendation = (req, res) => {
       cityTier
     };
 
+    const recommendation = await generateRecommendation(validatedData);
+
     return res.status(200).json({
       success: true,
-      message: 'Profile received successfully.',
-      data: validatedData
+      message: 'Recommendation generated successfully.',
+      data: recommendation
     });
   } catch (error) {
+    console.error('Error generating recommendation:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error occurred.'
