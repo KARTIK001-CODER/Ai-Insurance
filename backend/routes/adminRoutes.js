@@ -28,13 +28,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage, fileFilter });
+const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
 router.use(basicAuth);
 
 router.post('/upload-policy', (req, res, next) => {
-  upload.single('document')(req, res, (err) => {
+  upload.single('file')(req, res, (err) => {
     if (err) {
       return res.status(400).json({ success: false, message: err.message });
     }
