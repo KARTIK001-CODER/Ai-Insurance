@@ -9,6 +9,9 @@ const policiesMetadata = [];
 
 export const uploadPolicy = async (req, res) => {
   try {
+    console.log("FILE:", req.file);
+    console.log("BODY:", req.body);
+    
     const { policyName, insurer } = req.body;
     
     if (!policyName || !insurer) {
@@ -66,7 +69,8 @@ export const uploadPolicy = async (req, res) => {
     };
     policiesMetadata.push(newPolicy);
 
-    if (req.file) await fs.unlink(req.file.path).catch(() => {});
+    // Keep the file in the uploads folder on success
+    // if (req.file) await fs.unlink(req.file.path).catch(() => {});
 
     return res.status(200).json({
       success: true,

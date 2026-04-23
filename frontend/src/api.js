@@ -35,7 +35,7 @@ export const sendChat = async (userQuestion, userProfile, selectedPolicy, chatHi
 
 export const uploadPolicy = async (file, policyName, insurer, authStr) => {
   const formData = new FormData();
-  formData.append('document', file);
+  formData.append('file', file);
   formData.append('policyName', policyName);
   formData.append('insurer', insurer);
 
