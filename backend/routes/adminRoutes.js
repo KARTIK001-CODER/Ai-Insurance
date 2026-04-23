@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
-import { uploadPolicy } from '../controllers/adminController.js';
+import { uploadPolicy, deletePolicy, queryPolicy } from '../controllers/adminController.js';
 
 const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -38,5 +38,8 @@ router.post('/upload-policy', (req, res, next) => {
     next();
   });
 }, uploadPolicy);
+
+router.delete('/policy/:policyName', deletePolicy);
+router.post('/query', queryPolicy);
 
 export default router;
