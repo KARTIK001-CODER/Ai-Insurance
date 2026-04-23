@@ -2,7 +2,8 @@ import express from 'express';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
-import { uploadPolicy, deletePolicy, queryPolicy } from '../controllers/adminController.js';
+import { uploadPolicy, deletePolicy, queryPolicy, getAllPolicies, updatePolicy } from '../controllers/adminController.js';
+import { basicAuth } from '../middleware/auth.js';
 
 const uploadDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -30,6 +31,8 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 const router = express.Router();
 
+router.use(basicAuth);
+
 router.post('/upload-policy', (req, res, next) => {
   upload.single('document')(req, res, (err) => {
     if (err) {
@@ -39,7 +42,9 @@ router.post('/upload-policy', (req, res, next) => {
   });
 }, uploadPolicy);
 
-router.delete('/policy/:policyName', deletePolicy);
+router.get('/policies', getAllPolicies);
+router.put('/policy/:id', updatePolicy);
+router.delete('/policy/:id', deletePolicy);
 router.post('/query', queryPolicy);
 
 export default router;

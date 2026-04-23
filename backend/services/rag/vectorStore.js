@@ -31,6 +31,15 @@ export const deleteDocuments = (policyName) => {
   }
 };
 
+export const updateDocumentsMetadata = (oldPolicyName, newPolicyName, newInsurer) => {
+  for (const item of store) {
+    if (item.policyName === oldPolicyName) {
+      if (newPolicyName) item.policyName = newPolicyName;
+      if (newInsurer) item.insurer = newInsurer;
+    }
+  }
+};
+
 export const retrieveRelevantChunks = (queryEmbedding, topK = 5, filterPolicyName = null) => {
   const results = [];
 
