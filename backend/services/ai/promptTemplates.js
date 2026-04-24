@@ -30,7 +30,7 @@ Output Requirements:
 Return a structured JSON object strictly following this format:
 
 {
-  "peerComparisonTable": [
+  "comparisonTable": [
     {
       "policyName": "...",
       "insurer": "...",
@@ -41,18 +41,20 @@ Return a structured JSON object strictly following this format:
       "suitabilityScore": "..."
     }
   ],
-  "coverageDetailTable": {
+  "coverageDetails": {
     "inclusions": ["..."],
     "exclusions": ["..."],
     "subLimits": "...",
     "coPay": "...",
     "claimType": "..."
   },
-  "whyThisPolicy": "150-250 words explaining why this is the best policy. Must reference at least 3 user profile fields. Must explain trade-offs (cost vs coverage, waiting period, etc.). Start by acknowledging the user's health/lifestyle context in simple, non-technical language. Define insurance terms when used."
+  "explanation": "150-250 words explaining why this is the best policy. Must reference at least 3 user profile fields. Must explain trade-offs (cost vs coverage, waiting period, etc.). Start by acknowledging the user's health/lifestyle context in simple, non-technical language. Define insurance terms when used."
 }
 
 Grounding Rules:
 - Only use information from the Available Policy Documents.
+- Do not filter out policies strictly based on pre-existing conditions; instead, explain waiting periods or exclusions.
+- Suggest at least 2-3 different policies if available in the context to provide choice.
 - Do not hallucinate policy details.
 - If data is missing for a field, explicitly write "Not specified in document".
 - If the user explicitly asks for medical advice (e.g., surgery decision), your root output must instead be exactly: "I can help with insurance-related queries, but not medical advice."
@@ -60,6 +62,7 @@ Grounding Rules:
 Be empathetic, simple, and clear.
   `;
 };
+
 
 export const buildChatPrompt = (userQuestion, userProfile, selectedPolicy, chatHistory, retrievedChunks) => {
   const profileContext = `

@@ -1,13 +1,18 @@
-
 import { generateEmbedding } from '../rag/embedder.js';
 import { retrieveRelevantChunks } from '../rag/vectorStore.js';
 import { buildRecommendationPrompt } from './promptTemplates.js';
 
 export const generateRecommendation = async (userProfile) => {
-  const queryText = `Health insurance for ${userProfile.age} year old, ${userProfile.lifestyle} lifestyle, pre-existing conditions: ${userProfile.preExistingConditions.join(', ')}`;
+  console.log('[Agent] Generating recommendation for:', userProfile.fullName);
+  
+  // Use a broader query to improve retrieval stability as requested
+  const queryText = `health insurance coverage waiting period exclusions ${userProfile.preExistingConditions.join(' ')}`;
+  console.log(`[Agent] Retrieval query: "${queryText}"`);
   
   const queryEmbedding = await generateEmbedding(queryText);
-  const retrievedChunks = retrieveRelevantChunks(queryEmbedding, 5);
+  const retrievedChunks = retrieveRelevantChunks(queryEmbedding, 10); // Increased k for better coverage
+  
+  console.log(`[Agent] Retrieved ${retrievedChunks.length} chunks for context.`);
   
   const prompt = buildRecommendationPrompt(userProfile, retrievedChunks);
   
@@ -16,6 +21,7 @@ export const generateRecommendation = async (userProfile) => {
     throw new Error('GROQ_API_KEY is missing');
   }
 
+  console.log('[Agent] Calling LLM (llama-3.3-70b-versatile)...');
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -31,14 +37,18 @@ export const generateRecommendation = async (userProfile) => {
 
   const data = await response.json();
   if (!response.ok) {
+    console.error('[Agent] LLM API Error:', data.error);
     throw new Error(data.error?.message || "Failed to fetch from Groq API");
   }
 
   const responseText = data.choices[0].message.content;
+  console.log('[Agent] LLM Response received.');
   
   if (responseText.includes("I can help with insurance-related queries, but not medical advice.")) {
     return {
-      message: "I can help with insurance-related queries, but not medical advice."
+      explanation: "I can help with insurance-related queries, but not medical advice.",
+      comparisonTable: [],
+      coverageDetails: {}
     };
   }
 
@@ -49,6 +59,13 @@ export const generateRecommendation = async (userProfile) => {
     }
     return JSON.parse(responseText);
   } catch (error) {
-    return responseText;
+    console.error('[Agent] Error parsing LLM response as JSON:', error);
+    // Return a structured error response if JSON parsing fails
+    return {
+      explanation: "Error parsing recommendation data. Raw response: " + responseText.substring(0, 500),
+      comparisonTable: [],
+      coverageDetails: {}
+    };
   }
 };
+

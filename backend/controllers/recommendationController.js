@@ -1,6 +1,7 @@
 import { generateRecommendation } from '../services/ai/agent.js';
 
 export const createRecommendation = async (req, res) => {
+  console.log('[RecommendationController] Incoming request:', JSON.stringify(req.body, null, 2));
   try {
     const { fullName, age, lifestyle, preExistingConditions, incomeBand, cityTier } = req.body;
 
@@ -19,13 +20,13 @@ export const createRecommendation = async (req, res) => {
       errors.push(`lifestyle is required and must be one of: ${allowedLifestyles.join(', ')}.`);
     }
 
-    const allowedConditions = ['Diabetes', 'Hypertension', 'Asthma', 'Cardiac', 'None', 'Other'];
     if (!preExistingConditions || !Array.isArray(preExistingConditions) || preExistingConditions.length === 0) {
       errors.push('preExistingConditions is required and must be a non-empty array of strings.');
     } else {
-      const invalidConditions = preExistingConditions.filter(c => !allowedConditions.includes(c));
-      if (invalidConditions.length > 0) {
-        errors.push(`preExistingConditions contains invalid values: ${invalidConditions.join(', ')}. Allowed values are: ${allowedConditions.join(', ')}.`);
+      // Check for empty or undefined values
+      const hasInvalidValues = preExistingConditions.some(c => !c || typeof c !== 'string' || c.trim() === '');
+      if (hasInvalidValues) {
+        errors.push('preExistingConditions cannot contain empty or undefined values.');
       }
     }
 
@@ -40,6 +41,7 @@ export const createRecommendation = async (req, res) => {
     }
 
     if (errors.length > 0) {
+      console.warn('[RecommendationController] Validation failed:', errors);
       return res.status(400).json({
         success: false,
         message: 'Validation failed. Please check your request data.',
@@ -51,23 +53,38 @@ export const createRecommendation = async (req, res) => {
       fullName: fullName.trim(),
       age,
       lifestyle,
-      preExistingConditions,
+      preExistingConditions: preExistingConditions.map(c => c.trim()),
       incomeBand,
       cityTier
     };
 
     const recommendation = await generateRecommendation(validatedData);
 
+    // Ensure consistent response format
+    const formattedResponse = {
+      comparisonTable: recommendation.comparisonTable || recommendation.peerComparisonTable || [],
+      coverageDetails: recommendation.coverageDetails || recommendation.coverageDetailTable || {},
+      explanation: recommendation.explanation || recommendation.whyThisPolicy || "No specific explanation provided."
+    };
+
+    // If no data found or returned empty
+    if (formattedResponse.comparisonTable.length === 0) {
+      formattedResponse.explanation = "We couldn't find specific policies matching your criteria exactly, but here are some general recommendations.";
+    }
+
+    console.log('[RecommendationController] Sending response:', JSON.stringify(formattedResponse, null, 2));
+
     return res.status(200).json({
       success: true,
       message: 'Recommendation generated successfully.',
-      data: recommendation
+      data: formattedResponse
     });
   } catch (error) {
-    console.error('Error generating recommendation:', error);
+    console.error('[RecommendationController] Error generating recommendation:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error occurred.'
     });
   }
 };
+

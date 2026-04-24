@@ -1,4 +1,5 @@
 export const chunkText = (text) => {
+  console.log(`[Chunker] Starting chunking process for text of length ${text.length}...`);
   const chunks = [];
   const paragraphs = text.split(/\n\s*\n/);
 
@@ -32,5 +33,7 @@ export const chunkText = (text) => {
     chunks.push(currentChunk.join(' '));
   }
 
+  console.log(`[Chunker] Created ${chunks.length} chunks.`);
   return chunks;
 };
+

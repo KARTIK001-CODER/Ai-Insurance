@@ -28,7 +28,6 @@ const ChatBox = ({ userProfile, selectedPolicy }) => {
     setLoading(true);
 
     try {
-      // API expects userQuestion, userProfile, selectedPolicy, chatHistory
       const res = await sendChat(userMsg, userProfile, selectedPolicy, messages);
       setMessages([...newMessages, { role: 'agent', content: res.data.text }]);
     } catch (err) {
@@ -40,7 +39,17 @@ const ChatBox = ({ userProfile, selectedPolicy }) => {
 
   return (
     <div className="chat-container">
-      <div style={{ padding: '1rem', background: '#F3F4F6', borderBottom: '1px solid var(--border-color)', fontWeight: 600 }}>
+      <div style={{ 
+        padding: '1.25rem 1.5rem', 
+        background: 'rgba(99, 102, 241, 0.05)', 
+        borderBottom: '1px solid var(--border-color)', 
+        fontWeight: 700,
+        color: 'var(--primary-dark)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem'
+      }}>
+        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)' }}></div>
         AI Policy Explainer
       </div>
       <div className="chat-messages">
@@ -49,7 +58,13 @@ const ChatBox = ({ userProfile, selectedPolicy }) => {
             {msg.content}
           </div>
         ))}
-        {loading && <div className="chat-message chat-agent">Thinking...</div>}
+        {loading && (
+          <div className="chat-message chat-agent" style={{ display: 'flex', gap: '4px', alignItems: 'center', padding: '0.75rem 1rem' }}>
+            <span style={{ animation: 'bounce 1s infinite' }}>●</span>
+            <span style={{ animation: 'bounce 1s infinite 0.2s' }}>●</span>
+            <span style={{ animation: 'bounce 1s infinite 0.4s' }}>●</span>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       <form className="chat-input-area" onSubmit={handleSend}>
@@ -59,13 +74,22 @@ const ChatBox = ({ userProfile, selectedPolicy }) => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about co-pay, exclusions, etc..." 
           disabled={loading}
+          style={{ borderRadius: '25px' }}
         />
-        <button type="submit" className="btn btn-primary" disabled={loading || !input.trim()}>
-          Send
+        <button type="submit" className="btn btn-primary" style={{ borderRadius: '25px', padding: '0 1.5rem', height: '45px' }} disabled={loading || !input.trim()}>
+          {loading ? '...' : 'Send'}
         </button>
       </form>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); opacity: 0.3; }
+          50% { transform: translateY(-4px); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };
 
 export default ChatBox;
+
