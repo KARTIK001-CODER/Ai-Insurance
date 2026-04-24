@@ -21,6 +21,8 @@ const Home = () => {
           recommendation: res.data
         } 
       });
+
+
     } catch (err) {
       setError('Failed to fetch recommendation. Please try again.');
     } finally {

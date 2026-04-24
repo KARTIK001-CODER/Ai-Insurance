@@ -38,16 +38,16 @@ const Recommendation = () => {
       </div>
 
 
-      <div className="card mb-8">
-        <h3 className="mb-4">1. Peer Comparison Table</h3>
-        {comparisonData.length > 0 ? (
-          <ComparisonTable data={comparisonData} />
-        ) : (
+      {comparisonData.length > 0 ? (
+        <ComparisonTable data={comparisonData} />
+      ) : (
+        <div className="card mb-8">
+          <h3 className="mb-4">1. Peer Comparison Table</h3>
           <div className="alert-info" style={{ padding: '1rem', background: '#F3F4F6', borderRadius: '8px' }}>
             No specific policies found for comparison. Please try adjusting your criteria.
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="grid-2">
         <div>
