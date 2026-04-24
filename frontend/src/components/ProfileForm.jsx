@@ -11,6 +11,7 @@ const ProfileForm = ({ onSubmit, loading }) => {
     incomeBand: '3-8L',
     cityTier: 'Tier-2'
   });
+  const [otherCondition, setOtherCondition] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,19 +25,39 @@ const ProfileForm = ({ onSubmit, loading }) => {
       if (conditions.includes(value)) {
         return { ...prev, preExistingConditions: conditions.filter(c => c !== value) };
       } else {
-        return { ...prev, preExistingConditions: [...conditions, value] };
+        // If selecting anything other than 'None', remove 'None'
+        if (value !== 'None') {
+          const filtered = conditions.filter(c => c !== 'None');
+          return { ...prev, preExistingConditions: [...filtered, value] };
+        }
+        // If selecting 'None', clear everything else
+        return { ...prev, preExistingConditions: ['None'] };
       }
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.age || formData.preExistingConditions.length === 0) {
+    
+    let conditions = [...formData.preExistingConditions];
+    
+    if (conditions.includes('Other')) {
+      if (!otherCondition.trim()) {
+        alert('Please specify the "Other" condition.');
+        return;
+      }
+      // Replace 'Other' with the actual value
+      conditions = conditions.map(c => c === 'Other' ? otherCondition.trim() : c);
+    }
+
+    if (!formData.fullName || !formData.age || conditions.length === 0) {
       alert('Please fill out all fields and select at least one condition (or None).');
       return;
     }
+
     onSubmit({
       ...formData,
+      preExistingConditions: conditions,
       age: parseInt(formData.age, 10)
     });
   };
@@ -84,11 +105,15 @@ const ProfileForm = ({ onSubmit, loading }) => {
         </div>
       </div>
 
-      <div className="form-group mb-8">
+      <div className="form-group mb-4">
         <label className="form-label">Pre-existing Conditions</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
           {conditionsList.map(cond => (
-            <label key={cond} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#F3F4F6', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer' }}>
+            <label key={cond} className="condition-badge" style={{ 
+              background: formData.preExistingConditions.includes(cond) ? 'var(--primary-light)' : 'rgba(255,255,255,0.5)', 
+              color: formData.preExistingConditions.includes(cond) ? 'var(--primary-dark)' : 'var(--text-main)',
+              border: formData.preExistingConditions.includes(cond) ? '2px solid var(--primary)' : '2px solid transparent'
+            }}>
               <input 
                 type="checkbox" 
                 value={cond} 
@@ -101,11 +126,27 @@ const ProfileForm = ({ onSubmit, loading }) => {
         </div>
       </div>
 
-      <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-        {loading ? 'Generating Recommendation...' : 'Get Recommendation'}
+      {formData.preExistingConditions.includes('Other') && (
+        <div className="form-group mb-8" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+          <label className="form-label">Please specify other condition</label>
+          <input 
+            className="form-input" 
+            value={otherCondition} 
+            onChange={(e) => setOtherCondition(e.target.value)} 
+            placeholder="e.g. Thyroid, PCOD" 
+            required 
+          />
+        </div>
+      )}
+
+      <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
+        {loading && <div className="loading-spinner"></div>}
+        {loading ? 'Processing...' : 'Get Personalized Recommendation'}
       </button>
     </form>
   );
 };
 
+
 export default ProfileForm;
+

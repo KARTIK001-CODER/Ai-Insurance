@@ -1,0 +1,23 @@
+[
+  {
+    "id": "f4530840-e064-4a72-95af-b2ebca1972f0",
+    "policyName": "StarHealth",
+    "insurer": "abc",
+    "fileType": "application/pdf",
+    "uploadDate": "2026-04-24T09:34:59.967Z"
+  },
+  {
+    "id": "c6ba17d4-8998-4cf4-b7cd-0398730a13e7",
+    "policyName": "HDFC",
+    "insurer": "ABC",
+    "fileType": "application/pdf",
+    "uploadDate": "2026-04-24T09:35:12.901Z"
+  },
+  {
+    "id": "04de0749-8948-44f1-bd38-4deeb066935b",
+    "policyName": "Niva",
+    "insurer": "ABC",
+    "fileType": "application/pdf",
+    "uploadDate": "2026-04-24T09:35:26.515Z"
+  }
+]

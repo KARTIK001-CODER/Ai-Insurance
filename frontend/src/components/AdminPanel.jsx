@@ -45,7 +45,7 @@ const AdminPanel = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure?')) return;
+    if (!window.confirm('Are you sure you want to delete this policy and its indexed chunks?')) return;
     try {
       await deletePolicy(id, authStr);
       fetchPolicies();
@@ -69,60 +69,66 @@ const AdminPanel = () => {
   };
 
   return (
-    <div>
-      <div className="card mb-8">
-        <h3 className="mb-4">Upload New Policy</h3>
-        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-        {msg && <div style={{ color: 'green', marginBottom: '1rem' }}>{msg}</div>}
-        <form onSubmit={handleUpload} className="grid-2">
-          <div className="form-group">
-            <label className="form-label">Policy Document (PDF/TXT/JSON)</label>
-            <input type="file" className="form-input" accept=".txt,.pdf,.json" onChange={(e) => setFile(e.target.files[0])} />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Policy Name</label>
-            <input type="text" className="form-input" value={policyName} onChange={e => setPolicyName(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Insurer</label>
-            <input type="text" className="form-input" value={insurer} onChange={e => setInsurer(e.target.value)} />
-          </div>
-          <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Uploading...' : 'Upload'}
-            </button>
+    <div className="admin-page">
+      <div className="admin-panel-card mb-8">
+        <h3 className="mb-6" style={{ color: 'var(--primary-dark)', fontSize: '1.5rem' }}>Index New Policy</h3>
+        {error && <div className="alert-info" style={{ background: '#FEE2E2', color: '#B91C1C', borderLeftColor: '#EF4444' }}>{error}</div>}
+        {msg && <div className="alert-info">{msg}</div>}
+        
+        <form onSubmit={handleUpload}>
+          <div className="grid-2">
+            <div className="form-group">
+              <label className="form-label">Policy Document (PDF, TXT, JSON)</label>
+              <input type="file" className="form-input" accept=".txt,.pdf,.json" onChange={(e) => setFile(e.target.files[0])} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Policy Name</label>
+              <input type="text" className="form-input" placeholder="e.g. Health Plus Gold" value={policyName} onChange={e => setPolicyName(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Insurer Name</label>
+              <input type="text" className="form-input" placeholder="e.g. HDFC Ergo" value={insurer} onChange={e => setInsurer(e.target.value)} />
+            </div>
+            <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+                {loading && <div className="loading-spinner"></div>}
+                {loading ? 'Indexing...' : 'Upload & Index'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
 
       <div className="card">
-        <h3 className="mb-4">Manage Policies</h3>
+        <h3 className="mb-6" style={{ fontSize: '1.25rem' }}>Active Knowledge Base</h3>
         <div className="table-container">
           <table>
             <thead>
               <tr>
                 <th>Policy Name</th>
                 <th>Insurer</th>
-                <th>File Type</th>
-                <th>Upload Date</th>
+                <th>Format</th>
+                <th>Indexed Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {policies.map(p => (
                 <tr key={p.id}>
-                  <td style={{ fontWeight: 600 }}>{p.policyName}</td>
-                  <td>{p.insurer}</td>
-                  <td>{p.fileType}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--primary-dark)' }}>{p.policyName}</td>
+                  <td style={{ fontWeight: 500 }}>{p.insurer}</td>
+                  <td><span style={{ background: '#F3F4F6', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem' }}>{p.fileType}</span></td>
                   <td>{new Date(p.uploadDate).toLocaleDateString()}</td>
                   <td>
-                    <button className="btn" style={{ marginRight: '0.5rem', background: '#E5E7EB', padding: '0.5rem 1rem' }} onClick={() => handleUpdate(p.id, p.policyName, p.insurer)}>Edit</button>
-                    <button className="btn btn-danger" style={{ padding: '0.5rem 1rem' }} onClick={() => handleDelete(p.id)}>Delete</button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }} onClick={() => handleUpdate(p.id, p.policyName, p.insurer)}>Edit</button>
+                      <button className="btn btn-danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#FEE2E2', color: '#B91C1C' }} onClick={() => handleDelete(p.id)}>Delete</button>
+                    </div>
                   </td>
                 </tr>
               ))}
               {policies.length === 0 && (
-                <tr><td colSpan="5" style={{ textAlign: 'center' }}>No policies found.</td></tr>
+                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No policies currently indexed in the vector store.</td></tr>
               )}
             </tbody>
           </table>
@@ -133,3 +139,4 @@ const AdminPanel = () => {
 };
 
 export default AdminPanel;
+
