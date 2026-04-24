@@ -5,46 +5,52 @@ const ComparisonTable = ({ data }) => {
     <div className="alert-info">No comparison data available for these criteria.</div>
   );
 
+  const getBadgeClass = (score) => {
+    if (!score) return '';
+    const s = score.toLowerCase();
+    if (s.includes('high') || s.includes('good') || s.includes('recommend')) return 'badge-high';
+    if (s.includes('caution') || s.includes('average') || s.includes('moderate')) return 'badge-caution';
+    return 'badge-high'; // Default to high/green if unsure
+  };
+
   return (
-    <div className="table-container mb-8">
-      <table>
-        <thead>
-          <tr>
-            <th>Policy Name</th>
-            <th>Insurer</th>
-            <th>Premium (Rs/yr)</th>
-            <th>Coverage</th>
-            <th>Waiting Period</th>
-            <th>Key Benefit</th>
-            <th>Suitability</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, idx) => (
-            <tr key={idx}>
-              <td style={{ fontWeight: 700, color: 'var(--primary-dark)', fontSize: '0.95rem' }}>{row.policyName}</td>
-              <td style={{ fontWeight: 500 }}>{row.insurer}</td>
-              <td style={{ fontFamily: 'var(--font-heading)', fontWeight: 600 }}>{row.premium}</td>
-              <td>{row.coverageAmount}</td>
-              <td style={{ fontSize: '0.9rem' }}>{row.waitingPeriod}</td>
-              <td style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>{row.keyBenefit}</td>
-              <td>
-                <span style={{ 
-                   background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                   color: 'white', 
-                   padding: '0.4rem 0.75rem', 
-                   borderRadius: '20px',
-                   fontWeight: 700,
-                   fontSize: '0.8rem',
-                   boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.3)'
-                }}>
-                  {row.suitabilityScore}
-                </span>
-              </td>
+    <div className="comparison-card">
+      <div className="comparison-header">
+        <h2 className="comparison-title">Peer Comparison Table</h2>
+      </div>
+      
+      <div className="comparison-table-wrapper">
+        <table className="comparison-table">
+          <thead>
+            <tr>
+              <th>Policy Name</th>
+              <th>Insurer</th>
+              <th className="numeric-cell">Premium (Rs/yr)</th>
+              <th>Coverage</th>
+              <th>Waiting Period</th>
+              <th>Key Benefit</th>
+              <th>Suitability</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((row, idx) => (
+              <tr key={idx}>
+                <td className="policy-name-cell">{row.policyName}</td>
+                <td>{row.insurer}</td>
+                <td className="numeric-cell">₹{row.premium}</td>
+                <td className="text-wrap-column">{row.coverageAmount}</td>
+                <td>{row.waitingPeriod}</td>
+                <td className="text-wrap-column" style={{ fontSize: '0.85rem' }}>{row.keyBenefit}</td>
+                <td>
+                  <span className={`suitability-badge ${getBadgeClass(row.suitabilityScore)}`}>
+                    {row.suitabilityScore}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
