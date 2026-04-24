@@ -77,7 +77,7 @@ const AdminPanel = () => {
         <form onSubmit={handleUpload} className="grid-2">
           <div className="form-group">
             <label className="form-label">Policy Document (PDF/TXT/JSON)</label>
-            <input type="file" className="form-input" onChange={(e) => setFile(e.target.files[0])} />
+            <input type="file" className="form-input" accept=".txt,.pdf,.json" onChange={(e) => setFile(e.target.files[0])} />
           </div>
           <div className="form-group">
             <label className="form-label">Policy Name</label>
